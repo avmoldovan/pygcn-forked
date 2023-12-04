@@ -38,8 +38,9 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # Load data
-adj, features, labels, idx_train, idx_val, idx_test = load_data()
+adj, features, labels, idx_train, idx_val, idx_test = load_data(device=device)
 
 # Model and optimizer
 model = GCN(nfeat=features.shape[1],
