@@ -65,6 +65,11 @@ def train(epoch):
     model.train()
     optimizer.zero_grad()
     output = model(features, adj)
+    # for edge in adj:
+    #     node1, node2 = edge
+    #     #edge_value = torch.sum(data.x[node1]) + torch.sum(data.x[node2])
+    #     #G[node1][node2]['weight'] = edge_value.item()
+
     loss_train = F.nll_loss(output[idx_train], labels[idx_train])
     acc_train = accuracy(output[idx_train], labels[idx_train])
     loss_train.backward()
