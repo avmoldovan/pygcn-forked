@@ -31,6 +31,17 @@ class GraphConvolution(Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def forward(self, input, adj):
+        for i in range(input.size(0)):
+            for j in range(input.size(0)):
+                if i != j:
+                    # Assuming input is a feature matrix with nodes as rows
+                    node_i_features = input[i]
+                    node_j_features = input[j]
+
+                    # Calculate transfer entropy from node i to node j
+                    #te_value = te.te_compute(node_i_features, node_j_features, k=1, embedding=1, safetyCheck=False, GPU=False)
+
+
         support = torch.mm(input, self.weight)
         output = torch.spmm(adj, support)
         if self.bias is not None:
