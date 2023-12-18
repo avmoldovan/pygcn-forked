@@ -1,5 +1,7 @@
 import torch
 import torch_scatter
+from torch import Tensor
+from torch_geometric.utils import scatter
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
 
@@ -36,8 +38,11 @@ class CustomConv(MessagePassing):
 
     def aggregate(self, inputs, index, dim_size=None):
         # The aggregation method. For simplicity, we use summation here.
-        return torch_scatter.scatter(inputs, index, dim=self.node_dim, reduce='mean', dim_size=dim_size)
+        return scatter(inputs, index, dim=self.node_dim, dim_size=dim_size, reduce='mean')
+        #return torch_scatter.scatter(inputs, index, dim=self.node_dim, reduce='mean', dim_size=dim_size)
 
+    def update(self, inputs: Tensor) -> Tensor:
+        return inputs
 
 import torch.nn.functional as F
 
