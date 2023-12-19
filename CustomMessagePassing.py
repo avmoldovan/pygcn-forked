@@ -35,8 +35,9 @@ class CustomConv(MessagePassing):
         custom_weight = self.custom_weight_update(x_i, x_j)
 
         # Return the updated features for aggregation.
-        norm = F.normalize((torch.tensor(custom_weight).to(device) * x_j).to(torch.float32))
-        return norm
+        #norm = F.normalize((torch.tensor(custom_weight).to(device)).to(torch.float32))
+        #tes = torch.tensor(custom_weight).to(device).to(torch.float32)
+        return custom_weight * x_j
         #return custom_weight * x_j
 
     def custom_weight_update(self, x_i, x_j):
@@ -47,10 +48,11 @@ class CustomConv(MessagePassing):
         #te1 = te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=100, embedding=1, safetyCheck=False, GPU=False)
         tes = []
         for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
-            teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
+            teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=100, embedding=1, safetyCheck=False, GPU=False)
             tes.append(teitem)
-            #te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=100, embedding=1, safetyCheck=False, GPU=False)
-        return expit(tes)
+        #return tes
+        return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_i)
+        #return expit(torch.tensor(tes).to(device).to(torch.float32) + x_i)
         #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
 
     def aggregate(self, inputs, index, dim_size=None):
