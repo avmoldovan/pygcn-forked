@@ -348,6 +348,64 @@ Epoch: 139, Loss: 0.4740, Train: 1.0000, Val: 0.7840, Test: 0.8200
 Epoch: 140, Loss: 0.4186, Train: 1.0000, Val: 0.7820, Test: 0.8190
 Epoch: 141, Loss: 0.4051, Train: 0.9929, Val: 0.7840, Test: 0.8180
 Epoch: 142, Loss: 0.3906, Train: 1.0000, Val: 0.7780, Test: 0.8140
+Epoch: 143, Loss: 0.3981, Train: 0.9929, Val: 0.7760, Test: 0.8120
+Epoch: 144, Loss: 0.4450, Train: 0.9929, Val: 0.7760, Test: 0.8140
+Epoch: 145, Loss: 0.4068, Train: 0.9929, Val: 0.7780, Test: 0.8160
+Epoch: 146, Loss: 0.3585, Train: 0.9929, Val: 0.7780, Test: 0.8160
+Epoch: 147, Loss: 0.3681, Train: 0.9929, Val: 0.7820, Test: 0.8140
+Epoch: 148, Loss: 0.4031, Train: 0.9929, Val: 0.7800, Test: 0.8150
+Epoch: 149, Loss: 0.3797, Train: 0.9929, Val: 0.7780, Test: 0.8140
+Epoch: 150, Loss: 0.3920, Train: 0.9929, Val: 0.7820, Test: 0.8150
+Epoch: 151, Loss: 0.3784, Train: 0.9929, Val: 0.7840, Test: 0.8170
+Epoch: 152, Loss: 0.3887, Train: 0.9929, Val: 0.7840, Test: 0.8150
+Epoch: 153, Loss: 0.3596, Train: 0.9929, Val: 0.7840, Test: 0.8140
+Epoch: 154, Loss: 0.3714, Train: 0.9929, Val: 0.7780, Test: 0.8140
+Epoch: 155, Loss: 0.3496, Train: 1.0000, Val: 0.7780, Test: 0.8130
+Epoch: 156, Loss: 0.3982, Train: 1.0000, Val: 0.7820, Test: 0.8140
+Epoch: 157, Loss: 0.3700, Train: 1.0000, Val: 0.7780, Test: 0.8130
+Epoch: 158, Loss: 0.3608, Train: 1.0000, Val: 0.7780, Test: 0.8090
+Epoch: 159, Loss: 0.3698, Train: 1.0000, Val: 0.7800, Test: 0.8140
+Epoch: 160, Loss: 0.3914, Train: 1.0000, Val: 0.7800, Test: 0.8090
+Epoch: 161, Loss: 0.3757, Train: 1.0000, Val: 0.7800, Test: 0.8120
+Epoch: 162, Loss: 0.3805, Train: 1.0000, Val: 0.7780, Test: 0.8120
+Epoch: 163, Loss: 0.3597, Train: 0.9929, Val: 0.7800, Test: 0.8110
+Epoch: 164, Loss: 0.3747, Train: 1.0000, Val: 0.7760, Test: 0.8140
+Epoch: 165, Loss: 0.3525, Train: 1.0000, Val: 0.7760, Test: 0.8120
+Epoch: 166, Loss: 0.3738, Train: 1.0000, Val: 0.7800, Test: 0.8140
+Epoch: 167, Loss: 0.3589, Train: 1.0000, Val: 0.7800, Test: 0.8130
+Epoch: 168, Loss: 0.3423, Train: 1.0000, Val: 0.7800, Test: 0.8150
+Epoch: 169, Loss: 0.3313, Train: 1.0000, Val: 0.7800, Test: 0.8120
+Epoch: 170, Loss: 0.3451, Train: 1.0000, Val: 0.7780, Test: 0.8150
+Epoch: 171, Loss: 0.3497, Train: 1.0000, Val: 0.7760, Test: 0.8150
+Epoch: 172, Loss: 0.3431, Train: 1.0000, Val: 0.7800, Test: 0.8140
+Epoch: 173, Loss: 0.3653, Train: 1.0000, Val: 0.7800, Test: 0.8170
+Epoch: 174, Loss: 0.3558, Train: 1.0000, Val: 0.7800, Test: 0.8170
+Epoch: 175, Loss: 0.3279, Train: 1.0000, Val: 0.7800, Test: 0.8170
+Epoch: 176, Loss: 0.3488, Train: 1.0000, Val: 0.7800, Test: 0.8170
+Epoch: 177, Loss: 0.3593, Train: 1.0000, Val: 0.7800, Test: 0.8180
+Epoch: 178, Loss: 0.3497, Train: 1.0000, Val: 0.7820, Test: 0.8220
+Epoch: 179, Loss: 0.3288, Train: 1.0000, Val: 0.7800, Test: 0.8180
+Epoch: 180, Loss: 0.3461, Train: 1.0000, Val: 0.7820, Test: 0.8210
+Epoch: 181, Loss: 0.3759, Train: 1.0000, Val: 0.7820, Test: 0.8170
+Epoch: 182, Loss: 0.3698, Train: 1.0000, Val: 0.7820, Test: 0.8190
+Epoch: 183, Loss: 0.3340, Train: 1.0000, Val: 0.7820, Test: 0.8190
+Epoch: 184, Loss: 0.3254, Train: 1.0000, Val: 0.7820, Test: 0.8180
+Epoch: 185, Loss: 0.3583, Train: 1.0000, Val: 0.7820, Test: 0.8150
+Epoch: 186, Loss: 0.3179, Train: 1.0000, Val: 0.7780, Test: 0.8140
+Epoch: 187, Loss: 0.3043, Train: 1.0000, Val: 0.7780, Test: 0.8140
+Epoch: 188, Loss: 0.3393, Train: 1.0000, Val: 0.7780, Test: 0.8140
+Epoch: 189, Loss: 0.3055, Train: 1.0000, Val: 0.7780, Test: 0.8160
+Epoch: 190, Loss: 0.3002, Train: 1.0000, Val: 0.7760, Test: 0.8170
+Epoch: 191, Loss: 0.3060, Train: 1.0000, Val: 0.7760, Test: 0.8170
+Epoch: 192, Loss: 0.3500, Train: 1.0000, Val: 0.7800, Test: 0.8190
+Epoch: 193, Loss: 0.3083, Train: 1.0000, Val: 0.7800, Test: 0.8190
+Epoch: 194, Loss: 0.3455, Train: 1.0000, Val: 0.7820, Test: 0.8230
+Epoch: 195, Loss: 0.3209, Train: 1.0000, Val: 0.7820, Test: 0.8210
+Epoch: 196, Loss: 0.3328, Train: 1.0000, Val: 0.7820, Test: 0.8210
+Epoch: 197, Loss: 0.3240, Train: 1.0000, Val: 0.7820, Test: 0.8210
+Epoch: 198, Loss: 0.3189, Train: 1.0000, Val: 0.7800, Test: 0.8170
+Epoch: 199, Loss: 0.3397, Train: 1.0000, Val: 0.7800, Test: 0.8190
+Epoch: 200, Loss: 0.3231, Train: 1.0000, Val: 0.7820, Test: 0.8180
 """
 # Function to parse data string
 def parse_data(data_str):
@@ -368,11 +426,11 @@ df2 = parse_data(data_str2)
 plt.figure(figsize=(10, 6))
 
 # Plot dataset 1
-plt.plot(df1['Epoch'], df1['Val'], color='red', label='Dataset 1 - Val')
+plt.plot(df1['Epoch'], df1['Val'], color='orange', label='Dataset 1 - Val')
 #plt.plot(df1['Epoch'], df1['Test'], color='blue', label='Dataset 1 - Test')
 
 # Plot dataset 2
-plt.plot(df2['Epoch'], df2['Val'], color='orange', linestyle='dashed', label='Dataset 2 - Val')
+plt.plot(df2['Epoch'], df2['Val'], color='green', label='Dataset 2 - Val')
 #plt.plot(df2['Epoch'], df2['Test'], color='green', linestyle='dashed', label='Dataset 2 - Test')
 
 plt.xlabel('Epoch')
