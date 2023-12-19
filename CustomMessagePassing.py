@@ -4,6 +4,12 @@ from torch import Tensor
 from torch_geometric.utils import scatter
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
+from PyIF import te_compute as te
+import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
+#sliding_window_view(np.array([4, 2, 3, 8, -6, 10]), window_shape = 3)
+from functools import reduce
+from scipy.special import expit
 
 class CustomConv(MessagePassing):
     def __init__(self, in_channels, out_channels):
@@ -29,12 +35,23 @@ class CustomConv(MessagePassing):
         custom_weight = self.custom_weight_update(x_i, x_j)
 
         # Return the updated features for aggregation.
-        return custom_weight * x_j
+        norm = F.normalize((torch.tensor(custom_weight).to(device) * x_j).to(torch.float32))
+        return norm
+        #return custom_weight * x_j
 
     def custom_weight_update(self, x_i, x_j):
         # Implement your custom weight update algorithm here.
-        # This is just a placeholder example:
-        return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
+
+        #te1 = te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=1, embedding=1, safetyCheck=False, GPU=False)
+        #te.te_compute(np.array([0,1,0,1,0,0,1,0,1,0,]), np.array([0,1,0,0,0,0,1,0,0,0]), k=1, embedding=1,safetyCheck=False, GPU=True)
+        #te1 = te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=100, embedding=1, safetyCheck=False, GPU=False)
+        tes = []
+        for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
+            teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
+            tes.append(teitem)
+            #te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=100, embedding=1, safetyCheck=False, GPU=False)
+        return expit(tes)
+        #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
 
     def aggregate(self, inputs, index, dim_size=None):
         # The aggregation method. For simplicity, we use summation here.
@@ -55,7 +72,8 @@ class CustomGCN(torch.nn.Module):
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
 
-        x = F.relu(self.conv1(x, edge_index))
+        x = self.conv1(x, edge_index)
+        x = F.relu(x)
         x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index)
 
@@ -78,8 +96,12 @@ def train():
     model.train()
     optimizer.zero_grad()
     out = model(data)
-    loss = criterion(out[data.train_mask], data.y[data.train_mask])
+
+    #loss = criterion(out[data.train_mask], data.y[data.train_mask])
+    #loss.backward()
+    loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
     loss.backward()
+
     optimizer.step()
     return loss.item()
 
