@@ -10,6 +10,20 @@ from numpy.lib.stride_tricks import sliding_window_view
 #sliding_window_view(np.array([4, 2, 3, 8, -6, 10]), window_shape = 3)
 from functools import reduce
 from scipy.special import expit
+from utils import get_baseline_run
+import neptune
+
+token = "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIxMDVkMzRmYS1hODJlLTQ3OGItYjdiYi0zZTJhMGI1ZGNhOGIifQ=="
+pname = "adrian.moldovan/GNN"
+
+run = neptune.init_run(
+    project=pname,
+    api_token=token,
+    source_files=['*.py'],
+    tags=["sigmoid(tes * x_j)"]
+    # mode='read-only'
+)
+
 
 class CustomConv(MessagePassing):
     def __init__(self, in_channels, out_channels):
@@ -37,7 +51,7 @@ class CustomConv(MessagePassing):
         # Return the updated features for aggregation.
         #norm = F.normalize((torch.tensor(custom_weight).to(device)).to(torch.float32))
         #tes = torch.tensor(custom_weight).to(device).to(torch.float32)
-        return custom_weight * x_j
+        return custom_weight #* x_j
         #return custom_weight * x_j
 
     def custom_weight_update(self, x_i, x_j):
@@ -51,7 +65,8 @@ class CustomConv(MessagePassing):
             teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
             tes.append(teitem)
         #return tes
-        return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32))
+        detached = torch.tensor(tes).to(device).to(torch.float32)
+        return torch.sigmoid(detached * x_j)
         #return expit(torch.tensor(tes).to(device).to(torch.float32) + x_i)
         #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
 
@@ -119,6 +134,10 @@ def test():
 for epoch in range(200):
     loss = train()
     train_acc, val_acc, test_acc = test()
+    run["train_acc"].append(train_acc)
+    run["epoch"].append(epoch)
+    run["val_acc"].append(val_acc)
+    run["test_acc"].append(test_acc)
     print(f'Epoch: {epoch+1:03d}, Loss: {loss:.4f}, '
           f'Train: {train_acc:.4f}, Val: {val_acc:.4f}, Test: {test_acc:.4f}')
 
