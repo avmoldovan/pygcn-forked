@@ -48,10 +48,10 @@ class CustomConv(MessagePassing):
         #te1 = te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=100, embedding=1, safetyCheck=False, GPU=False)
         tes = []
         for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
-            teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=100, embedding=1, safetyCheck=False, GPU=False)
+            teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
             tes.append(teitem)
         #return tes
-        return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_i)
+        return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32))
         #return expit(torch.tensor(tes).to(device).to(torch.float32) + x_i)
         #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
 
