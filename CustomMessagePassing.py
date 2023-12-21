@@ -20,7 +20,14 @@ run = neptune.init_run(
     project=pname,
     api_token=token,
     source_files=['*.py'],
-    tags=["sigmoid(tes * x_j)"]
+    #tags=["torch.sigmoid(0.1 * detached * x_j)"] not working!!!!
+    #tags = ["sigmoid(0.1 * tes * x_j)"]
+    #tags = ["sigmoid(tes * x_j)"]
+    tags = ["torch.sigmoid((detached/2.) * x_j)"] #for the 2nd conv layer
+    #tags = ["torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))"] !!!!!!!!! need to test
+    #tags=["torch.sigmoid(0.9 * detached * x_j)"] #does not work
+    #tags=["torch.sigmoid(detached + torch.sum(x_i * x_j, dim=-1, keepdim=True))"]
+    #tags=["torch.sigmoid(detached + torch.sum(x_i * x_j, dim=-1, keepdim=True))"] NOT OK!!!
     # mode='read-only'
 )
 
@@ -51,24 +58,28 @@ class CustomConv(MessagePassing):
         # Return the updated features for aggregation.
         #norm = F.normalize((torch.tensor(custom_weight).to(device)).to(torch.float32))
         #tes = torch.tensor(custom_weight).to(device).to(torch.float32)
-        return custom_weight #* x_j
+        return custom_weight
         #return custom_weight * x_j
 
     def custom_weight_update(self, x_i, x_j):
-        # Implement your custom weight update algorithm here.
-
-        #te1 = te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=1, embedding=1, safetyCheck=False, GPU=False)
-        #te.te_compute(np.array([0,1,0,1,0,0,1,0,1,0,]), np.array([0,1,0,0,0,0,1,0,0,0]), k=1, embedding=1,safetyCheck=False, GPU=True)
-        #te1 = te.te_compute(x_i.detach().cpu().numpy().flatten(), x_j.detach().cpu().numpy().flatten(), k=100, embedding=1, safetyCheck=False, GPU=False)
         tes = []
         for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
             teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
             tes.append(teitem)
         #return tes
         detached = torch.tensor(tes).to(device).to(torch.float32)
+        #not tried return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_j)
+        #return torch.sigmoid(detached * x_j)
+        #return torch.sigmoid(0.1 * detached * x_j) not ok
+
+        if detached.shape[0] == 7:
+            return torch.sigmoid((detached/2.) * x_j)
         return torch.sigmoid(detached * x_j)
+        #return torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))
+
         #return expit(torch.tensor(tes).to(device).to(torch.float32) + x_i)
         #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
+        #return torch.sigmoid(torch.sum(x_i * x_j * detached, dim=-1, keepdim=True))
 
     def aggregate(self, inputs, index, dim_size=None):
         # The aggregation method. For simplicity, we use summation here.
