@@ -131,13 +131,30 @@ def test():
         accs.append(acc)
     return accs
 
+import pandas as pd
+dfbaseline = pd.read_csv('./baseline.csv')
+dfbaseline.set_index('epoch')
+
+def log(key, val):
+    run[key].append(val)
+
+def log_set(dict:dict, baseline=False):
+    for k in dict.keys():
+        if baseline == True:
+            run[k + '_b'].append(dict[k])
+        else:
+            run[k].append(dict[k])
+
 for epoch in range(200):
     loss = train()
     train_acc, val_acc, test_acc = test()
-    run["train_acc"].append(train_acc)
-    run["epoch"].append(epoch)
-    run["val_acc"].append(val_acc)
-    run["test_acc"].append(test_acc)
+    log_set({"train_acc" : train_acc, "train_loss": loss, "epoch": epoch, "val_acc" : val_acc, "test_acc" : test_acc})
+    log_set(dfbaseline.loc[dfbaseline['epoch'].eq(epoch+1)].to_dict(orient='records')[0], baseline=True)
+
+    # run["train_acc"].append(train_acc)
+    # run["epoch"].append(epoch)
+    # run["val_acc"].append(val_acc)
+    # run["test_acc"].append(test_acc)
     print(f'Epoch: {epoch+1:03d}, Loss: {loss:.4f}, '
           f'Train: {train_acc:.4f}, Val: {val_acc:.4f}, Test: {test_acc:.4f}')
 

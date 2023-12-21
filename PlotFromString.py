@@ -1,5 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+token = "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIxMDVkMzRmYS1hODJlLTQ3OGItYjdiYi0zZTJhMGI1ZGNhOGIifQ=="
+pname = "adrian.moldovan/GNN"
+import neptune
+
+run = neptune.init_run(
+    project=pname,
+    api_token=token,
+    source_files=['*.py'],
+    tags=["sigmoid(tes * x_j)"]
+    # mode='read-only'
+)
 
 # Data string
 data_str1 = """
@@ -1024,28 +1035,36 @@ def parse_data(data_str):
     for line in data_str.strip().split('\n'):
         parts = line.split(',')
         epoch = int(parts[0].split(':')[1].strip())
+        loss = float(parts[1].split(':')[1].strip())
+        train = float(parts[2].split(':')[1].strip())
         val = float(parts[3].split(':')[1].strip())
         test = float(parts[4].split(':')[1].strip())
-        data.append([epoch, val, test])
-    return pd.DataFrame(data, columns=['Epoch', 'Val', 'Test'])
+        data.append([epoch, loss, train, val, test])
+        # run["train_acc"].append(train)
+        # run["loss"].append(loss)
+        # run["epoch"].append(epoch)
+        # run["val_acc"].append(val)
+        # run["test_acc"].append(test)
+    return pd.DataFrame(data, columns=['Epoch', 'Loss', 'Train', 'Val', 'Test'])
 
 # Parsing the data
 df1 = parse_data(data_str1)
+#df1.to_csv('baseline.csv')
 df2 = parse_data(data_str2)
-
-# Plotting
-plt.figure(figsize=(10, 6))
-
-# Plot dataset 1
-plt.plot(df1['Epoch'], df1['Val'], color='orange', label='Dataset 1 - Val')
-#plt.plot(df1['Epoch'], df1['Test'], color='blue', label='Dataset 1 - Test')
-
-# Plot dataset 2
-plt.plot(df2['Epoch'], df2['Val'], color='green', label='Dataset 2 - Val')
-#plt.plot(df2['Epoch'], df2['Test'], color='green', linestyle='dashed', label='Dataset 2 - Test')
-
-plt.xlabel('Epoch')
-plt.ylabel('Values')
-plt.title('Comparison of Two Datasets')
-plt.legend()
-plt.show()
+#
+# # Plotting
+# plt.figure(figsize=(10, 6))
+#
+# # Plot dataset 1
+# plt.plot(df1['Epoch'], df1['Val'], color='orange', label='Dataset 1 - Val')
+# #plt.plot(df1['Epoch'], df1['Test'], color='blue', label='Dataset 1 - Test')
+#
+# # Plot dataset 2
+# plt.plot(df2['Epoch'], df2['Val'], color='green', label='Dataset 2 - Val')
+# #plt.plot(df2['Epoch'], df2['Test'], color='green', linestyle='dashed', label='Dataset 2 - Test')
+#
+# plt.xlabel('Epoch')
+# plt.ylabel('Values')
+# plt.title('Comparison of Two Datasets')
+# plt.legend()
+# plt.show()
