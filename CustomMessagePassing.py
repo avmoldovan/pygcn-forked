@@ -23,7 +23,7 @@ run = neptune.init_run(
     #tags=["torch.sigmoid(0.1 * detached * x_j)"] not working!!!!
     #tags = ["sigmoid(0.1 * tes * x_j)"]
     #tags = ["sigmoid(tes * x_j)"]
-    tags = ["torch.sigmoid((detached/2.) * x_j)"] #for the 2nd conv layer
+    tags = ["torch.sigmoid(((tes * connection_count )/2.) * x_j)"] #for the 2nd conv layer
     #tags = ["torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))"] !!!!!!!!! need to test
     #tags=["torch.sigmoid(0.9 * detached * x_j)"] #does not work
     #tags=["torch.sigmoid(detached + torch.sum(x_i * x_j, dim=-1, keepdim=True))"]
@@ -65,7 +65,7 @@ class CustomConv(MessagePassing):
         tes = []
         for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
             teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
-            tes.append(teitem)
+            tes.append(teitem * float(i+1))
         #return tes
         detached = torch.tensor(tes).to(device).to(torch.float32)
         #not tried return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_j)
