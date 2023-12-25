@@ -21,6 +21,64 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from PyIF import te_compute as te
+
+def log(key, val, run):
+    run[key].append(val)
+
+def log_set(dict:dict, run, baseline=False):
+    for k in dict.keys():
+        if baseline == True:
+            run[k + '_b'].append(dict[k])
+        else:
+            run[k].append(dict[k])
+
+def custom_weight_update(x_i, x_j):
+    tes = []
+
+    for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
+        teitem = te.te_compute(xi, x_j[:, i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
+        tes.append(teitem)  # * float(i+1))
+    detached = torch.tensor(tes).to(device).to(torch.float32)
+
+
+    # not tried return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_j)
+    # return torch.sigmoid(detached * x_j)
+    # return torch.sigmoid(0.1 * detached * x_j) not ok
+
+    if detached.shape[0] == 7:
+        return torch.sigmoid((detached/2.) * x_j)
+
+    #best
+    return torch.sigmoid(detached * x_j)
+
+    # return torch.sigmoid(torch.sum(detached * x_j * x_j, dim=-1, keepdim=True))
+    # return torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))
+
+    # return expit(torch.tensor(tes).to(device).to(torch.float32) + x_i)
+    # return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
+    # return torch.sigmoid(torch.sum(x_i * x_j * detached, dim=-1, keepdim=True))
+
+    # def custom_weight_update(self, x_i, x_j):
+    #     tes = []
+    #     for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
+    #         teitem = te.te_compute(xi, x_j[:,i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
+    #         tes.append(teitem)# * float(i+1))
+    #     #return tes
+    #     detached = torch.tensor(tes).to(device).to(torch.float32)
+    #     #not tried return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_j)
+    #     #return torch.sigmoid(detached * x_j)
+    #     return torch.sigmoid(detached * x_j)
+    #
+    #     # if detached.shape[0] == 7:
+    #     #     return torch.sigmoid((detached/2.) * x_j)
+    #     #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
+    #     #return torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))
+    #
+    #     #return expit(torch.tensor(tes).to(device).to(torch.float32) + x_i)
+    #     #return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
+    #     #return torch.sigmoid(torch.sum(x_i * x_j * detached, dim=-1, keepdim=True))
+
 def get_baseline_run():
 
     # Data string

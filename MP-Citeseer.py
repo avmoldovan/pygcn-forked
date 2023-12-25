@@ -10,12 +10,17 @@ from numpy.lib.stride_tricks import sliding_window_view
 #sliding_window_view(np.array([4, 2, 3, 8, -6, 10]), window_shape = 3)
 from functools import reduce
 from scipy.special import expit
-from utils import get_baseline_run, log, log_set, custom_weight_update
+from utils import get_baseline_run, custom_weight_update, log, log_set
 import neptune
+
+import torch.nn.functional as F
+
+import torch_geometric.transforms as T
+from torch_geometric.datasets import Planetoid
+import os.path as osp
 
 token = "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIxMDVkMzRmYS1hODJlLTQ3OGItYjdiYi0zZTJhMGI1ZGNhOGIifQ=="
 pname = "adrian.moldovan/GNN"
-dataset = "cora"
 
 run = neptune.init_run(
     project=pname,
@@ -24,7 +29,7 @@ run = neptune.init_run(
     #tags=["torch.sigmoid(0.1 * detached * x_j)"] not working!!!!
     #tags = ["sigmoid(0.1 * tes * x_j)"]
     #tags = ["sigmoid(tes * x_j)"]
-    tags = [dataset, "torch.sigmoid(((tes * connection_count )/2.) * x_j)"] #for the 2nd conv layer
+    tags = ["citeseer","torch.sigmoid(((tes * connection_count )/2.) * x_j)"] #for the 2nd conv layer
     #tags = ["torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))"] !!!!!!!!! need to test
     #tags=["torch.sigmoid(0.9 * detached * x_j)"] #does not work
     #tags=["torch.sigmoid(detached + torch.sum(x_i * x_j, dim=-1, keepdim=True))"]
@@ -48,6 +53,8 @@ class CustomConv(MessagePassing):
         # Start propagating messages.
         return self.propagate(edge_index, size=(x.size(0), x.size(0)), x=x)
 
+    def weight_update(self, x_i, x_j):
+        return torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
     def message(self, x_i, x_j, edge_index, size):
         # x_i and x_j are features of nodes i and j, where (i, j) is an edge.
 
@@ -62,6 +69,7 @@ class CustomConv(MessagePassing):
         return custom_weight
         #return custom_weight * x_j
 
+
     def aggregate(self, inputs, index, dim_size=None):
         # The aggregation method. For simplicity, we use summation here.
         return scatter(inputs, index, dim=self.node_dim, dim_size=dim_size, reduce='mean')
@@ -69,8 +77,6 @@ class CustomConv(MessagePassing):
 
     def update(self, inputs: Tensor) -> Tensor:
         return inputs
-
-import torch.nn.functional as F
 
 class CustomGCN(torch.nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -88,23 +94,31 @@ class CustomGCN(torch.nn.Module):
 
         return F.log_softmax(x, dim=1)
 
-import torch_geometric.transforms as T
-from torch_geometric.datasets import Planetoid
-import os.path as osp
 
-dataset = Planetoid(root='/tmp/Cora', name='Cora')
+dataset = Planetoid(root='/tmp/Citeseer', name='Citeseer')
 data = dataset[0]
+datab = data.clone()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+deviceb = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = CustomGCN(dataset.num_node_features, dataset.num_classes).to(device)
+modelb = CustomGCN(dataset.num_node_features, dataset.num_classes).to(deviceb)
 data = data.to(device)
+
+datab = datab.to(deviceb)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
-criterion = torch.nn.CrossEntropyLoss()
+optimizerb = torch.optim.Adam(modelb.parameters(), lr=0.01, weight_decay=5e-4)
+# criterion = torch.nn.CrossEntropyLoss()
+# criterionb = torch.nn.CrossEntropyLoss()
 
 def train():
     model.train()
     optimizer.zero_grad()
     out = model(data)
+
+    modelb.train()
+    optimizerb.zero_grad()
+    outb = modelb(datab)
 
     #loss = criterion(out[data.train_mask], data.y[data.train_mask])
     #loss.backward()
@@ -112,27 +126,37 @@ def train():
     loss.backward()
 
     optimizer.step()
-    return loss.item()
+
+    lossb = F.nll_loss(outb[data.train_mask], data.y[data.train_mask])
+    lossb.backward()
+
+    optimizerb.step()
+    return loss.item(), lossb.item()
 
 def test():
     model.eval()
+    modelb.eval()
+
     logits, accs = model(data), []
+    logitsb, accsb = modelb(data), []
+
     for _, mask in data('train_mask', 'val_mask', 'test_mask'):
         pred = logits[mask].max(1)[1]
+        predb = logitsb[mask].max(1)[1]
         acc = pred.eq(data.y[mask]).sum().item() / mask.sum().item()
+        accb = predb.eq(data.y[mask]).sum().item() / mask.sum().item()
         accs.append(acc)
-    return accs
+        accsb.append(accb)
 
-import pandas as pd
-dfbaseline = pd.read_csv('./baseline.csv')
-dfbaseline.set_index('epoch')
+    return accs, accsb
 
 
 for epoch in range(200):
-    loss = train()
+    loss, lossb = train()
     train_acc, val_acc, test_acc = test()
-    log_set({"train_acc" : train_acc, "train_loss": loss, "epoch": epoch, "val_acc" : val_acc, "test_acc" : test_acc}, run)
-    log_set(dfbaseline.loc[dfbaseline['epoch'].eq(epoch+1)].to_dict(orient='records')[0], run=run, baseline=True)
+
+    log_set({"train_acc" : train_acc, "train_loss": loss, "epoch": epoch, "val_acc" : val_acc, "test_acc" : test_acc}, run=run)
+    #log_set(dfbaseline.loc[dfbaseline['epoch'].eq(epoch+1)].to_dict(orient='records')[0], baseline=True)
 
     # run["train_acc"].append(train_acc)
     # run["epoch"].append(epoch)
