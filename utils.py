@@ -33,24 +33,28 @@ def log_set(dict:dict, run, baseline=False):
         else:
             run[k].append(dict[k])
 
-def custom_weight_update(x_i, x_j):
+def custom_weight_update(x_i, x_j, baseline=False):
+    if baseline == True:
+        #return torch.cat([x_i, x_j - x_i], dim=0)
+        return torch.sigmoid(x_i * x_j)#torch.sigmoid(torch.sum(x_i * x_j, dim=-1, keepdim=True))
+
     tes = []
 
     for i, xi in enumerate(x_i.t().detach().cpu().numpy()):
         teitem = te.te_compute(xi, x_j[:, i].detach().cpu().numpy(), k=1, embedding=1, safetyCheck=False, GPU=False)
         tes.append(teitem)  # * float(i+1))
     detached = torch.tensor(tes).to(device).to(torch.float32)
-
+    # best
+    return torch.sigmoid(detached * x_j)
 
     # not tried return torch.sigmoid(torch.tensor(tes).to(device).to(torch.float32) + x_j)
     # return torch.sigmoid(detached * x_j)
     # return torch.sigmoid(0.1 * detached * x_j) not ok
 
-    if detached.shape[0] == 7:
-        return torch.sigmoid((detached/2.) * x_j)
+    # if detached.shape[0] == 7:
+    #     return torch.sigmoid((detached/2.) * x_j)
 
-    #best
-    return torch.sigmoid(detached * x_j)
+
 
     # return torch.sigmoid(torch.sum(detached * x_j * x_j, dim=-1, keepdim=True))
     # return torch.sigmoid(torch.sum(0.1 * detached * x_j, dim=-1, keepdim=True))
